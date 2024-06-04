@@ -5,6 +5,9 @@ import database from "./config/database.js";
 import authenticateToken from "./middlewares/authenticateToken.js";
 import authRoutes from "./routes/authRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
+import Users from "./models/users.js";
+import LeaveType from "./models/leaveType.js";
+import Leave from "./models/leave.js";
 
 const app = express();
 
@@ -15,9 +18,30 @@ app.use(morgan("combined"));
 app.use("/auth", authRoutes);
 app.use("/product", authenticateToken, productRoutes);
 
+async function createTables() {
+    try {
+        console.log("Connection has been established successfully.");
+
+        // Créer d'abord la table `users`
+        await Users.sync({ force: true }); // `force: true` est utilisé pour recréer la table si elle existe déjà
+
+        // Ensuite, créer la table `leave_types`
+        await LeaveType.sync({ force: true });
+
+        // Enfin, créer la table `leaves`
+        await Leave.sync({ force: true });
+
+        console.log("All tables created successfully.");
+    } catch (error) {
+        console.error("Unable to connect to the database:", error);
+    }
+}
+
+createTables();
+
 database
-	.sync()
-	.then((data) => console.log("connected !"))
-	.catch((err) => console.log("error from db connection: ", err));
+    .sync()
+    .then((data) => console.log("connected !"))
+    .catch((err) => console.log("error from db connection: ", err));
 
 export default app;
