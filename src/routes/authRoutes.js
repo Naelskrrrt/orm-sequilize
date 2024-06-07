@@ -3,26 +3,28 @@ import bcrypt from "bcryptjs";
 import Users from "../models/users.js";
 import jwt from "jsonwebtoken";
 import {
-    deleteById,
-    getAll,
-    getById,
-    login,
-    register,
-    update,
+	deleteById,
+	getAll,
+	getById,
+	login,
+	register,
+	update,
 } from "../controllers/authControllers.js";
+import { validateUser } from "../middlewares/validateEntity.js";
+import { authorize } from "../middlewares/authorize.js";
 
 const router = express.Router();
 
-router.post("/register", register);
+router.post("/register", validateUser, register);
 
-router.post("/login", login);
+router.post("/login", authorize("admin"), login);
 
 router.get("/", getAll);
 
-router.get("/:id", getById);
+router.get("/:id", authorize("admin"), getById);
 
-router.put("/:id", update);
+router.put("/:id", authorize("admin"), validateUser, update);
 
-router.delete("/:id", deleteById);
+router.delete("/:id", authorize("admin"), deleteById);
 
 export default router;
